@@ -44,7 +44,7 @@ class RunwayManager {
      * Trying to acquire a free runway but Waits if all are allocated by planes
      */
     public synchronized int acquireRunway(String planeName) {
-        logger.info(planeName + " is requesting a runway...");
+        logger.info(planeName + " is requesting a runway");
         while (true) {
             
             for (int i = 0; i < runways.length; i++) {
@@ -95,7 +95,7 @@ class Airplane extends Thread {
      */
     @Override
     public void run() {
-        System.out.println(name + " is requesting a runway...");
+  
         int runwayIndex = manager.acquireRunway(name);
 
         try {
