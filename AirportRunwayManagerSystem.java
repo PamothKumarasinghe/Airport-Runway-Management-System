@@ -10,11 +10,14 @@
  * Starvation? - no starvation? - all planes will hv to use the runway eventually.
  * No crashes of planes
  */
+ 
+ import java.util.logging.*;
 
  public class AirportRunwayManagerSystem {
 
     public static void main(String[] args) {
         RunwayManager manager = new RunwayManager(5); // since there are 5 runways
+        
         for (int i = 1; i < 10 + 1; i++) { // creating 10 airplanes
             new Airplane("Airplane - " + i, manager).start();
         }
@@ -26,6 +29,7 @@
  */
 class RunwayManager {
     private final boolean[] runways;
+    private static final Logger logger = Logger.getLogger(RunwayManager.class.getName());
 
     /**
      * Constructor to initialize the runway availability.
@@ -34,27 +38,28 @@ class RunwayManager {
         // at the beginning all the runways are available - boolean[] initialized to false
         runways = new boolean[numberOfRunways]; // if the runway is free - then false - else true
 
-
     }
 
     /**
      * Trying to acquire a free runway but Waits if all are allocated by planes
      */
     public synchronized int acquireRunway(String planeName) {
+        logger.info(planeName + " is requesting a runway...");
         while (true) {
+            
             for (int i = 0; i < runways.length; i++) {
                 if (!runways[i]) {
                     runways[i] = true;
-                    System.out.println(planeName + " occupied the Runway " + (i + 1));
+                    logger.info(planeName + " has acquired Runway " + (i + 1));
+                    
                     return i; //returns the index of the acquired runwy
                 }
             }
             // If no runway is free, wait and retry
             try {
-                System.out.println(planeName + " is waiting for a runway ");
                 wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.warning("Interrupted while waiting for a runway: " + e.getMessage());
             }
         }
     }
@@ -64,7 +69,7 @@ class RunwayManager {
      */
     public synchronized void releaseRunway(int runwayIndex, String planeName) {
         runways[runwayIndex] = false; //after releasing the runway - set it to false since it is free
-        System.out.println(planeName + " has released the Runway " + (runwayIndex + 1));
+        logger.info(planeName + " has released Runway " + (runwayIndex + 1));
         notifyAll(); // Notify waiting planes/ waiting threads
     }
 }
@@ -75,6 +80,7 @@ class RunwayManager {
 class Airplane extends Thread {
     private final String name;
     private final RunwayManager manager;
+    private static final Logger logger = Logger.getLogger(Airplane.class.getName());
 
     /**
      * Constructor to set plane name and manager.
@@ -94,9 +100,10 @@ class Airplane extends Thread {
 
         try {
             // Simulate time taken to use the runway
+            logger.info(name + " is using Runway " + (runwayIndex + 1));
             Thread.sleep((int) (Math.random() * 3000) + 1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.warning(name + " was interrupted during operation: " + e.getMessage());
         }
 
         manager.releaseRunway(runwayIndex, name);
