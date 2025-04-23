@@ -51,6 +51,7 @@ class RunwayManager {
             }
             // If no runway is free, wait and retry
             try {
+                System.out.println(planeName + " is waiting for a runway ");
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
