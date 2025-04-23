@@ -44,13 +44,13 @@ class RunwayManager {
      * Trying to acquire a free runway but Waits if all are allocated by planes
      */
     public synchronized int acquireRunway(String planeName) {
-        logger.info(planeName + " is requesting a runway");
+        logger.log(Level.INFO, "{0} is requesting a runway", planeName);
         while (true) {
             
             for (int i = 0; i < runways.length; i++) {
                 if (!runways[i]) {
                     runways[i] = true;
-                    logger.info(planeName + " has acquired Runway " + (i + 1));
+                    logger.log(Level.INFO, "{0} has acquired Runway {1}{2}", new Object[]{planeName, i, 1});
                     
                     return i; //returns the index of the acquired runwy
                 }
@@ -59,7 +59,7 @@ class RunwayManager {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.warning("Interrupted while waiting for a runway: " + e.getMessage());
+                logger.log(Level.WARNING, "Interrupted while waiting for a runway: {0}", e.getMessage());
             }
         }
     }
@@ -69,7 +69,7 @@ class RunwayManager {
      */
     public synchronized void releaseRunway(int runwayIndex, String planeName) {
         runways[runwayIndex] = false; //after releasing the runway - set it to false since it is free
-        logger.info(planeName + " has released Runway " + (runwayIndex + 1));
+        logger.log(Level.INFO, "{0} has released Runway {1}{2}", new Object[]{planeName, runwayIndex, 1});
         notifyAll(); // Notify waiting planes/ waiting threads
     }
 }
@@ -100,10 +100,10 @@ class Airplane extends Thread {
 
         try {
             // Simulate time taken to use the runway
-            logger.info(name + " is using Runway " + (runwayIndex + 1));
+            logger.log(Level.INFO, "{0} is using Runway {1}{2}", new Object[]{name, runwayIndex, 1});
             Thread.sleep((int) (Math.random() * 3000) + 1000);
         } catch (InterruptedException e) {
-            logger.warning(name + " was interrupted during operation: " + e.getMessage());
+            logger.log(Level.WARNING, "{0} was interrupted during operation: {1}", new Object[]{name, e.getMessage()});
         }
 
         manager.releaseRunway(runwayIndex, name);
